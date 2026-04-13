@@ -10,6 +10,141 @@ from models import db, User, Product
 load_dotenv()
 
 
+def _ensure_database_and_seed(app):
+    """Inicializa la BD y carga datos iniciales si no existen."""
+    with app.app_context():
+        # Crear tablas si no existen
+        db.create_all()
+
+        # Crear admin si no existe
+        admin = User.query.filter_by(username=os.getenv('ADMIN_USERNAME', 'admin')).first()
+        if not admin:
+            admin = User(
+                username=os.getenv('ADMIN_USERNAME', 'admin'),
+                password_hash=generate_password_hash(os.getenv('ADMIN_PASSWORD', 'OrthoAdmin2024'))
+            )
+            db.session.add(admin)
+            db.session.commit()
+            print("Admin creado: " + admin.username)
+
+        # Seed data solo si no hay productos
+        if Product.query.first():
+            return
+
+        products = []
+
+        # Ligas (25 colores)
+        ligas = [
+            ("Liga Roja", "Liga elastica de color rojo intenso para brackets ortodonticos. Material de alta calidad con excelente elasticidad y resistencia. Compatible con todos los sistemas de brackets estandar.", "Ligas"),
+            ("Liga Azul Oscuro", "Liga elastica azul marino profesional. Color sobrio y elegante, muy popular entre pacientes adultos. Excelente fuerza de retencion.", "Ligas"),
+            ("Liga Azul Claro", "Liga elastica en tono azul cielo. Color fresco y juvenil que mantiene su intensidad durante todo el tratamiento.", "Ligas"),
+            ("Liga Verde", "Liga elastica verde brillante. Color vibrante y energetico, ideal para pacientes jovenes que buscan un look divertido.", "Ligas"),
+            ("Liga Rosa", "Liga elastica rosa pastel. Color suave y delicado, especialmente popular entre pacientes adolescentes.", "Ligas"),
+            ("Liga Rosa Fuerte", "Liga elastica en tono rosa fuerte/fucsia. Color llamativo y moderno con excelente durabilidad.", "Ligas"),
+            ("Liga Naranja", "Liga elastica naranja brillante. Color energetico y divertido, perfecto para combinar con tematicas festivas.", "Ligas"),
+            ("Liga Amarilla", "Liga elastica amarilla brillante. Color alegre y luminoso que aporta un toque de alegria a la sonrisa.", "Ligas"),
+            ("Liga Morada", "Liga elastica morada/violeta. Uno de los colores mas populares, combina bien con todos los tonos de piel.", "Ligas"),
+            ("Liga Blanca", "Liga elastica blanca translucida. Color discreto y limpio que simula la apariencia de brackets ceramicos.", "Ligas"),
+            ("Liga Negra", "Liga elastica negra. Color elegante y discreto que hace que los dientes se vean mas blancos por contraste.", "Ligas"),
+            ("Liga Gris", "Liga elastica gris plateado. Color neutro y profesional, excelente alternativa al negro.", "Ligas"),
+            ("Liga Turquesa", "Liga elastica turquesa. Color tropical y vibrante, muy popular entre adolescentes.", "Ligas"),
+            ("Liga Dorada", "Liga elastica color dorado/oro. Color premium y sofisticado que aporta un toque de lujo.", "Ligas"),
+            ("Liga Plateada", "Liga elastica color plata. Discreta y elegante, combina perfectamente con brackets metalicos.", "Ligas"),
+            ("Liga Verde Lima", "Liga elastica verde lima neon. Color fluorescente y llamativo, ideal para pacientes atrevidos.", "Ligas"),
+            ("Liga Lavanda", "Liga elastica lavanda suave. Color pastel tranquilo y elegante, muy estetico.", "Ligas"),
+            ("Liga Coral", "Liga elastica color coral. Tono calido entre rosa y naranja, muy popular y favorecedor.", "Ligas"),
+            ("Liga Celeste", "Liga elastica celeste claro. Color suave y relajante, alternativa delicada al azul intenso.", "Ligas"),
+            ("Liga Fucsia", "Liga elastica fucsia intenso. Color vibrante y atrevido con gran poder de expresion.", "Ligas"),
+            ("Liga Cafe", "Liga elastica color cafe/marron. Color neutro y discreto, poco comun pero elegante.", "Ligas"),
+            ("Liga Vino", "Liga elastica color vino/borgona. Color elegante y maduro, muy sofisticado.", "Ligas"),
+            ("Liga Verde Bosque", "Liga elastica verde bosque oscuro. Color natural y profundo, alternative al verde brillante.", "Ligas"),
+            ("Liga Arcoiris", "Liga elastica con colores tornasolados efecto arcoiris. Color especial y unico que cambia con la luz.", "Ligas"),
+            ("Liga Transparente", "Liga elastica transparente/cristal. La mas discreta de todas, practicamente invisible.", "Ligas"),
+        ]
+        for name, desc, cat in ligas:
+            products.append(Product(name=name, description=desc, category=cat))
+
+        # Cadenetas (25 colores)
+        cadenetas = [
+            ("Cadeneta Roja", "Cadena elastica roja para ortodoncia de cierre continuo. Excelente para cerrar espacios y mantener fuerza constante. Paquete de una cadena completa.", "Cadenetas"),
+            ("Cadeneta Azul Oscuro", "Cadena elastica azul marino de cierre continuo. Color profesional y sobrio, ideal para adultos. Alta resistencia a la decoloracion.", "Cadenetas"),
+            ("Cadeneta Azul Claro", "Cadena elastica azul cielo. Color fresco y juvenil con fuerza de cierre optima para tratamiento ortodontico.", "Cadenetas"),
+            ("Cadeneta Verde", "Cadena elastica verde brillante. Color energetico con excelente memoria elastica y durabilidad.", "Cadenetas"),
+            ("Cadeneta Rosa", "Cadena elastica rosa pastel. Color suave y popular entre adolescentes. Cierre espaciado uniforme.", "Cadenetas"),
+            ("Cadeneta Rosa Fuerte", "Cadena elastica fucsia intensa. Color atrevido y llamativo con fuerza de cierre constante.", "Cadenetas"),
+            ("Cadeneta Naranja", "Cadena elastica naranja brillante. Color vibrante y divertido para pacientes con personalidad.", "Cadenetas"),
+            ("Cadeneta Amarilla", "Cadena elastica amarilla. Color alegre y luminoso que aporta energia a la sonrisa.", "Cadenetas"),
+            ("Cadeneta Morada", "Cadena elastica morada/violeta. Color popular y versatil que favorece a todo tipo de pacientes.", "Cadenetas"),
+            ("Cadeneta Blanca", "Cadena elastica blanca translucida. Discreta y limpia, ideal para brackets ceramicos.", "Cadenetas"),
+            ("Cadeneta Negra", "Cadena elastica negra. Elegante y discreta, hace que los dientes resalten mas blancos.", "Cadenetas"),
+            ("Cadeneta Gris", "Cadena elastica gris. Color neutro y profesional, excelente balance entre discrecion y estilo.", "Cadenetas"),
+            ("Cadeneta Turquesa", "Cadena elastica turquesa. Color tropical y moderno con excelente fuerza de retencion.", "Cadenetas"),
+            ("Cadeneta Dorada", "Cadena elastica dorada. Color premium y sofisticado para un look diferenciado.", "Cadenetas"),
+            ("Cadeneta Plateada", "Cadena elastica plateada. Discreta y elegante, combina con brackets metalicos.", "Cadenetas"),
+            ("Cadeneta Verde Lima", "Cadena elastica verde lima neon. Color fluorescente atrevido para pacientes expresivos.", "Cadenetas"),
+            ("Cadeneta Lavanda", "Cadena elastica lavanda. Color pastel suave y elegante, muy estetico.", "Cadenetas"),
+            ("Cadeneta Coral", "Cadena elastica coral. Tono calido y favorecedor entre rosa y naranja.", "Cadenetas"),
+            ("Cadeneta Celeste", "Cadena elastica celeste. Color suave y delicado, alternativa al azul intenso.", "Cadenetas"),
+            ("Cadeneta Fucsia", "Cadena elastica fucsia. Color intenso y vibrante con gran impacto visual.", "Cadenetas"),
+            ("Cadeneta Cafe", "Cadena elastica cafe. Color neutro y poco comun pero elegante.", "Cadenetas"),
+            ("Cadeneta Vino", "Cadena elastica vino/borgona. Color maduro y sofisticado.", "Cadenetas"),
+            ("Cadeneta Verde Bosque", "Cadena elastica verde oscuro. Color profundo y natural.", "Cadenetas"),
+            ("Cadeneta Arcoiris", "Cadena elastica con efecto tornasol. Color especial que cambia con la luz.", "Cadenetas"),
+            ("Cadeneta Transparente", "Cadena elastica transparente/cristal. La mas discreta, practicamente invisible.", "Cadenetas"),
+        ]
+        for name, desc, cat in cadenetas:
+            products.append(Product(name=name, description=desc, category=cat))
+
+        # Kit de Higiene
+        kits = [
+            ("Kit de Higiene Basico", "Kit completo de higiene para pacientes de ortodoncia. Incluye cepillo dental de cabezal pequeno, cepillo interproximal, hilo dental especial para brackets y cera ortodontica protectora. Todo lo esencial para mantener una limpieza optima durante el tratamiento.", "Kit de Higiene"),
+            ("Kit de Higiene Premium", "Kit premium de higiene ortodontica con accesorios avanzados. Incluye cepillo electrico compatible con brackets, irrigador bucal de viaje, cepillos interproximales de varios tamanos, hilo dental Super Floss, cera ortodontica con sabor y estuche de transporte. Ideal para viajeros.", "Kit de Higiene"),
+            ("Kit de Higiene de Viaje", "Kit compacto de higiene ortodontica para llevar. Estuche portatil con cepillo plegable, mini pasta dental, cepillo interproximal y cera ortodontica. Perfecto para llevar al colegio, trabajo o viajes. Cabe en cualquier bolsillo.", "Kit de Higiene"),
+            ("Kit de Higiene Infantil", "Kit de higiene disenado para ninos en ortodoncia. Incluye cepillo de mangos ergonomicos para manos pequenas, cepillo interproximal suave, hilo dental con guia para ninos, cera con sabores divertidos y guia ilustrada de cepillado. Hace que la higiene sea divertida.", "Kit de Higiene"),
+        ]
+        for name, desc, cat in kits:
+            products.append(Product(name=name, description=desc, category=cat))
+
+        # Elasticos
+        elasticos = [
+            ("Elasticos 1/4 - Ligeros", "Elasticos ortodonticos medida 1/4 de pulgada (6.35mm). Fuerza ligera de 2oz. Ideales para movimientos dentales suaves y correcciones menores de mordida. Paquete de 100 unidades. Latex-free.", "Elasticos"),
+            ("Elasticos 1/4 - Medianos", "Elasticos ortodonticos medida 1/4 de pulgada (6.35mm). Fuerza mediana de 3.5oz. Para correcciones estandar de mordida clase II y III. Excelente elasticidad y fuerza consistente. Paquete de 100 unidades.", "Elasticos"),
+            ("Elasticos 1/4 - Fuertes", "Elasticos ortodonticos medida 1/4 de pulgada (6.35mm). Fuerza fuerte de 4.5oz. Para correcciones avanzadas de mordida que requieren mayor presion. Duracion prolongada. Paquete de 100 unidades.", "Elasticos"),
+            ("Elasticos 1/8 - Ligeros", "Elasticos ortodonticos medida 1/8 de pulgada (3.17mm). Fuerza ligera de 2oz. Diseno compacto para movimientos precisos en espacios reducidos. Alta resistencia a la rotura. Paquete de 100 unidades.", "Elasticos"),
+            ("Elasticos 1/8 - Medianos", "Elasticos ortodonticos medida 1/8 de pulgada (3.17mm). Fuerza mediana de 3.5oz. Para correcciones de mordida en espacios reducidos con fuerza moderada. Calidad premium. Paquete de 100 unidades.", "Elasticos"),
+            ("Elasticos 1/8 - Fuertes", "Elasticos ortodonticos medida 1/8 de pulgada (3.17mm). Fuerza fuerte de 4.5oz. Maxima potencia en tamano reducido para correcciones exigentes. Paquete de 100 unidades.", "Elasticos"),
+            ("Elasticos 3/16 - Ligeros", "Elasticos ortodonticos medida 3/16 de pulgada (4.76mm). Fuerza ligera de 2oz. Tamano intermedio versatil para multiples aplicaciones ortodonticas. Excelente relacion tamano-fuerza. Paquete de 100 unidades.", "Elasticos"),
+            ("Elasticos 3/16 - Medianos", "Elasticos ortodonticos medida 3/16 de pulgada (4.76mm). Fuerza mediana de 3.5oz. El tamano mas versatil para correcciones de mordida estandar. Fuerza constante y duradera. Paquete de 100 unidades.", "Elasticos"),
+            ("Elasticos 3/16 - Fuertes", "Elasticos ortodonticos medida 3/16 de pulgada (4.76mm). Fuerza fuerte de 4.5oz. Para correcciones de mordida que requieren fuerza significativa. Alta durabilidad. Paquete de 100 unidades.", "Elasticos"),
+        ]
+        for name, desc, cat in elasticos:
+            products.append(Product(name=name, description=desc, category=cat))
+
+        # Arcos Ortodonticos
+        arcos = [
+            ("Arco Nitinol 0.012", "Arco ortodontico de Nitinol (NiTi) super elastico calibre 0.012 pulgadas. Ideal para nivelacion inicial. Memoria de forma excepcional y fuerza constante. Longitud: arco superior e inferior. Unidad.", "Arcos Ortodonticos"),
+            ("Arco Nitinol 0.014", "Arco ortodontico de Nitinol calibre 0.014 pulgadas. Segunda fase de nivelacion. Excelente relacion flexibilidad-fuerza. Compatible con brackets de ranura 0.018 y 0.022. Unidad.", "Arcos Ortodonticos"),
+            ("Arco Nitinol 0.016", "Arco ortodontico de Nitinol calibre 0.016 pulgadas. Versatil para multiples fases del tratamiento. Fuerza suave y continua para movimiento dental eficiente. Unidad.", "Arcos Ortodonticos"),
+            ("Arco Nitinol 0.018", "Arco ortodontico de Nitinol calibre 0.018 pulgadas. Para fases intermedias de alineacion. Mayor rigidez que calibres menores manteniendo la super elasticidad. Unidad.", "Arcos Ortodonticos"),
+            ("Arco Nitinol 0.020", "Arco ortodontico de Nitinol calibre 0.020 pulgadas. Para fases avanzadas de nivelacion. Alta resistencia con elasticidad controlada. Unidad.", "Arcos Ortodonticos"),
+            ("Arco Acero 0.012", "Arco ortodontico de acero inoxidable calibre 0.012 pulgadas. Para fases de finished y detalado. Maximo control y precision en los movimientos finales. Unidad.", "Arcos Ortodonticos"),
+            ("Arco Acero 0.014", "Arco ortodontico de acero inoxidable calibre 0.014 pulgadas. Excelente para control de torque y cierre de espacios. Rigidez superior al Nitinol. Unidad.", "Arcos Ortodonticos"),
+            ("Arco Acero 0.016", "Arco ortodontico de acero inoxidable calibre 0.016 pulgadas. Versatil para detallado y acabados. Alta estabilidad dimensional. Unidad.", "Arcos Ortodonticos"),
+            ("Arco Acero 0.018", "Arco ortodontico de acero inoxidable calibre 0.018 pulgadas. Para brackets de ranura 0.018 en fase final. Maxima precision. Unidad.", "Arcos Ortodonticos"),
+            ("Arco Acero 0.020", "Arco ortodontico de acero inoxidable calibre 0.020 pulgadas. Ideal para arcos de trabajo y finalizacion. Excelente control tridimensional. Unidad.", "Arcos Ortodonticos"),
+            ("Arco Acero 0.022", "Arco ortodontico de acero inoxidable calibre 0.022 pulgadas. Para brackets de ranura 0.022 en fase final. Maxima rigidez y control. Unidad.", "Arcos Ortodonticos"),
+            ("Arco Nitinol Termico 0.016", "Arco ortodontico de Nitinol termico-activado calibre 0.016 pulgadas. Se activa con la temperatura bucal para ejercer fuerza progresiva. Tecnologia de ultima generacion. Unidad.", "Arcos Ortodonticos"),
+            ("Arco Nitinol Termico 0.018", "Arco ortodontico de Nitinol termico-activado calibre 0.018 pulgadas. Activacion termica para fuerza constante y suave. Comodidad superior para el paciente. Unidad.", "Arcos Ortodonticos"),
+            ("Arco Nitinol Termico 0.020", "Arco ortodontico de Nitinol termico-activado calibre 0.020 pulgadas. Tecnologia termica avanzada para movimientos eficientes. Menos visitas de ajuste necesarias. Unidad.", "Arcos Ortodonticos"),
+        ]
+        for name, desc, cat in arcos:
+            products.append(Product(name=name, description=desc, category=cat))
+
+        db.session.add_all(products)
+        db.session.commit()
+        print(f"Seed: {len(products)} productos cargados.")
+
+
 def create_app():
     """Factory para crear la aplicacion Flask."""
     app = Flask(__name__)
@@ -35,6 +170,9 @@ def create_app():
 
     # Asegurar que existe la carpeta de uploads
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+    # Inicializar BD y seed data
+    _ensure_database_and_seed(app)
 
     # Allowed extensions para imagenes
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
