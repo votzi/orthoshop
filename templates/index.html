@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}OrthoShop - Catálogo de Productos de Ortodoncia{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container">
+        <h1 class="hero-title">Productos de Ortodoncia</h1>
+        <p class="hero-subtitle">Catálogo completo de ligas, cadenetas, elásticos, arcos y más</p>
+    </div>
+</section>
+
+<section class="catalog-section">
+    <div class="container">
+        <div class="catalog-header">
+            <h2>Catálogo de Productos</h2>
+        </div>
+
+        <!-- Filtros y búsqueda -->
+        <div class="catalog-controls">
+            <form class="search-form" method="GET" action="{{ url_for('index') }}">
+                <input type="text" name="search" placeholder="Buscar producto..." class="search-input" value="{{ search or '' }}">
+                <button type="submit" class="btn btn--primary">Buscar</button>
+                {% if search %}
+                <a href="{{ url_for('index') }}" class="btn btn--outline btn--small">Limpiar</a>
+                {% endif %}
+            </form>
+
+            {% if categories %}
+            <div class="category-filters">
+                <a href="{{ url_for('index') }}" class="category-filter {% if not current_category %}active{% endif %}">Todos</a>
+                {% for category in categories %}
+                <a href="{{ url_for('index', category=category) }}" class="category-filter {% if current_category == category %}active{% endif %}">{{ category }}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        {% if current_category %}
+        <div class="active-filter">
+            <span>Categoría: <strong>{{ current_category }}</strong></span>
+            <a href="{{ url_for('index') }}" class="clear-filter">&times; Quitar filtro</a>
+        </div>
+        {% endif %}
+
+        {% if search %}
+        <div class="active-filter">
+            <span>Búsqueda: <strong>"{{ search }}"</strong></span>
+            <a href="{{ url_for('index') }}" class="clear-filter">&times; Limpiar búsqueda</a>
+        </div>
+        {% endif %}
+
+        <!-- Grid de productos -->
+        {% if products %}
+        <div class="products-grid">
+            {% for product in products %}
+            <a href="{{ url_for('product_detail', product_id=product.id) }}" class="product-card">
+                <div class="product-card-image">
+                    {% if product.image_filename %}
+                    <img src="{{ url_for('uploads', filename=product.image_filename) }}" alt="{{ product.name }}" loading="lazy">
+                    {% else %}
+                    <div class="product-placeholder">🦷</div>
+                    {% endif %}
+                </div>
+                <div class="product-card-content">
+                    <span class="product-category">{{ product.category }}</span>
+                    <h3 class="product-name">{{ product.name }}</h3>
+                    <p class="product-desc">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-catalog">
+            <div class="empty-catalog-icon">📦</div>
+            <h3>No se encontraron productos</h3>
+            {% if search or current_category %}
+            <p>No hay productos que coincidan con tu búsqueda.</p>
+            <a href="{{ url_for('index') }}" class="btn btn--primary">Ver todos los productos</a>
+            {% else %}
+            <p>El catálogo está vacío. Vuelve más tarde.</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

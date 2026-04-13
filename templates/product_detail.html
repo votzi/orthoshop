@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - OrthoShop{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav class="breadcrumb">
+        <a href="{{ url_for('index') }}">Catálogo</a>
+        <span>/</span>
+        <a href="{{ url_for('index', category=product.category) }}">{{ product.category }}</a>
+        <span>/</span>
+        <span>{{ product.name }}</span>
+    </nav>
+
+    <div class="product-detail">
+        <div class="product-detail-image">
+            {% if product.image_filename %}
+            <img src="{{ url_for('uploads', filename=product.image_filename) }}" alt="{{ product.name }}">
+            {% else %}
+            <div class="product-detail-placeholder">🦷</div>
+            {% endif %}
+        </div>
+
+        <div class="product-detail-info">
+            <span class="product-detail-category">{{ product.category }}</span>
+            <h1 class="product-detail-name">{{ product.name }}</h1>
+            <div class="product-detail-description">
+                {{ product.description | replace('\n', '<br>') | safe }}
+            </div>
+            <div class="product-detail-meta">
+                <span class="meta-item">
+                    <strong>Actualizado:</strong> {{ product.updated_at.strftime('%d/%m/%Y') if product.updated_at else product.created_at.strftime('%d/%m/%Y') }}
+                </span>
+            </div>
+            <a href="{{ url_for('index') }}" class="btn btn--primary">← Volver al Catálogo</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Productos - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-page-header">
+    <div class="header-row">
+        <div>
+            <h1>Productos</h1>
+            <p>Gestiona tu catálogo de productos de ortodoncia</p>
+        </div>
+        <a href="{{ url_for('admin_new_product') }}" class="btn btn--primary">➕ Nuevo Producto</a>
+    </div>
+</div>
+
+{% if categories %}
+<div class="filter-bar">
+    <span class="filter-label">Filtrar por categoría:</span>
+    <a href="{{ url_for('admin_products') }}" class="filter-chip {% if not current_category %}active{% endif %}">Todos</a>
+    {% for category in categories %}
+    <a href="{{ url_for('admin_products', category=category) }}" class="filter-chip {% if current_category == category %}active{% endif %}">{{ category }}</a>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if products %}
+<div class="products-admin-grid">
+    {% for product in products %}
+    <div class="product-admin-card">
+        <div class="product-admin-image">
+            {% if product.image_filename %}
+            <img src="{{ url_for('uploads', filename=product.image_filename) }}" alt="{{ product.name }}">
+            {% else %}
+            <div class="product-admin-placeholder">🦷</div>
+            {% endif %}
+        </div>
+        <div class="product-admin-info">
+            <h3 class="product-admin-name">{{ product.name }}</h3>
+            <span class="product-admin-category">{{ product.category }}</span>
+            <p class="product-admin-desc">{{ product.description[:80] }}{% if product.description|length > 80 %}...{% endif %}</p>
+        </div>
+        <div class="product-admin-actions">
+            <a href="{{ url_for('admin_edit_product', product_id=product.id) }}" class="btn btn--small btn--outline">✏️ Editar</a>
+            <form action="{{ url_for('admin_delete_product', product_id=product.id) }}" method="POST" class="inline-form" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este producto?');">
+                <button type="submit" class="btn btn--small btn--danger">🗑️ Eliminar</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon">📦</div>
+    <h3>No hay productos</h3>
+    <p>Aún no has agregado productos al catálogo.</p>
+    <a href="{{ url_for('admin_new_product') }}" class="btn btn--primary">Agregar Primer Producto</a>
+</div>
+{% endif %}
+{% endblock %}

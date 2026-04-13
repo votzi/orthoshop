@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Login Admin - OrthoShop{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-icon">🔐</div>
+        <h1 class="auth-title">Acceso Administrativo</h1>
+        <p class="auth-subtitle">Ingresa tus credenciales de administrador</p>
+
+        <form method="POST" action="{{ url_for('login') }}" class="auth-form">
+            <div class="form-group">
+                <label for="username" class="form-label">Usuario</label>
+                <input type="text" id="username" name="username" class="form-input" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Contraseña</label>
+                <input type="password" id="password" name="password" class="form-input" required>
+            </div>
+
+            <button type="submit" class="btn btn--primary btn--full-width">Iniciar Sesión</button>
+        </form>
+
+        <a href="{{ url_for('index') }}" class="auth-back-link">← Volver al catálogo</a>
+    </div>
+</div>
+{% endblock %}

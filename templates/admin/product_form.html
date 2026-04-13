@@ -1,0 +1,59 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}{% if product %}Editar{% else %}Nuevo{% endif %} Producto - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-page-header">
+    <h1>{% if product %}Editar Producto{% else %}Agregar Nuevo Producto{% endif %}</h1>
+    <p>{% if product %}Modifica los detalles del producto{% else %}Completa los datos del nuevo producto{% endif %}</p>
+</div>
+
+<div class="form-container">
+    <form method="POST" enctype="multipart/form-data" class="product-form">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="name" class="form-label">Nombre del Producto *</label>
+                <input type="text" id="name" name="name" class="form-input" required
+                       value="{{ product.name if product else '' }}" placeholder="Ej: Liga Elástica Azul">
+            </div>
+
+            <div class="form-group">
+                <label for="category" class="form-label">Categoría *</label>
+                <select id="category" name="category" class="form-input" required>
+                    <option value="">Selecciona una categoría</option>
+                    <option value="Ligas" {% if product and product.category == 'Ligas' %}selected{% endif %}>Ligas</option>
+                    <option value="Cadenetas" {% if product and product.category == 'Cadenetas' %}selected{% endif %}>Cadenetas</option>
+                    <option value="Kit de Higiene" {% if product and product.category == 'Kit de Higiene' %}selected{% endif %}>Kit de Higiene</option>
+                    <option value="Elásticos" {% if product and product.category == 'Elásticos' %}selected{% endif %}>Elásticos</option>
+                    <option value="Arcos Ortodónticos" {% if product and product.category == 'Arcos Ortodónticos' %}selected{% endif %}>Arcos Ortodónticos</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="description" class="form-label">Descripción *</label>
+            <textarea id="description" name="description" class="form-input form-textarea" required
+                      placeholder="Describe el producto en detalle...">{{ product.description if product else '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="image" class="form-label">Imagen del Producto</label>
+            {% if product and product.image_filename %}
+            <div class="current-image">
+                <p>Imagen actual:</p>
+                <img src="{{ url_for('uploads', filename=product.image_filename) }}" alt="Imagen actual" class="preview-image">
+            </div>
+            {% endif %}
+            <input type="file" id="image" name="image" class="form-file" accept="image/*">
+            <small class="form-help">Formatos aceptados: PNG, JPG, JPEG, GIF, WEBP. Tamaño máximo: 5MB</small>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('admin_products') }}" class="btn btn--outline">Cancelar</a>
+            <button type="submit" class="btn btn--primary">
+                {% if product %}Guardar Cambios{% else %}Crear Producto{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
